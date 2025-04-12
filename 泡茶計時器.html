@@ -163,6 +163,7 @@
             let elapsedTime = 0;
             let timerInterval;
             let isRunning = false;
+            const originalTitle = document.title;
             
             // 從本地存儲加載歷史紀錄
             let brewingHistory = JSON.parse(localStorage.getItem('brewingHistory')) || [];
@@ -193,6 +194,9 @@
                     isRunning = false;
                     clearInterval(timerInterval);
                     
+                    // 停止時恢復原始網頁標題
+                    document.title = originalTitle;
+                    
                     // 紀錄這次泡茶時間
                     const currentTime = formatTime(elapsedTime);
                     brewingHistory.unshift({
@@ -218,6 +222,9 @@
                 elapsedTime = 0;
                 timerDisplay.textContent = '00:00:00';
                 
+                // 重置時恢復原始網頁標題
+                document.title = originalTitle;
+                
                 startBtn.disabled = false;
                 stopBtn.disabled = true;
                 resetBtn.disabled = true;
@@ -226,7 +233,11 @@
             // 更新計時器顯示
             function updateTimer() {
                 elapsedTime = Date.now() - startTime;
-                timerDisplay.textContent = formatTime(elapsedTime);
+                const formattedTime = formatTime(elapsedTime);
+                timerDisplay.textContent = formattedTime;
+                
+                // 更新網頁標題顯示當前計時
+                document.title = `${formattedTime} - 茶葉沖泡中`;
             }
             
             // 格式化時間為 HH:MM:SS 格式
