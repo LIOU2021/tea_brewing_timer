@@ -96,10 +96,22 @@
             border-bottom: 1px solid #eee;
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
         
         .history-item:last-child {
             border-bottom: none;
+        }
+        
+        .history-item .brew-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .history-item span.number {
+            font-weight: bold;
+            margin-right: 8px;
+            min-width: 24px;
         }
         
         .history-item span.time {
@@ -199,10 +211,15 @@
                     
                     // 紀錄這次泡茶時間
                     const currentTime = formatTime(elapsedTime);
-                    brewingHistory.unshift({
+                    
+                    // 新增沖泡次數屬性，第一次泡的茶是第1次，以此類推
+                    const brewNumber = brewingHistory.length + 1;
+                    
+                    brewingHistory.push({
                         id: Date.now(),
                         time: currentTime,
-                        timestamp: new Date().toLocaleString()
+                        timestamp: new Date().toLocaleString(),
+                        number: brewNumber
                     });
                     
                     // 保存到本地存儲
@@ -282,12 +299,17 @@
                     return;
                 }
                 
-                brewingHistory.forEach((brew, index) => {
+                // 倒序顯示歷史記錄，最新的記錄在最上面
+                brewingHistory.slice().reverse().forEach((brew) => {
                     const item = document.createElement('li');
                     item.className = 'history-item';
                     
-                    const indexSpan = document.createElement('span');
-                    indexSpan.textContent = `${index + 1}. `;
+                    const brewInfo = document.createElement('div');
+                    brewInfo.className = 'brew-info';
+                    
+                    const numberSpan = document.createElement('span');
+                    numberSpan.className = 'number';
+                    numberSpan.textContent = `第${brew.number}次: `;
                     
                     const timeSpan = document.createElement('span');
                     timeSpan.className = 'time';
@@ -306,8 +328,9 @@
                         deleteHistoryItem(brew.id);
                     });
                     
-                    item.appendChild(indexSpan);
-                    item.appendChild(timeSpan);
+                    brewInfo.appendChild(numberSpan);
+                    brewInfo.appendChild(timeSpan);
+                    item.appendChild(brewInfo);
                     item.appendChild(deleteBtn);
                     historyList.appendChild(item);
                 });
@@ -315,9 +338,18 @@
             
             // 刪除單筆歷史紀錄
             function deleteHistoryItem(id) {
-                brewingHistory = brewingHistory.filter(brew => brew.id !== id);
-                localStorage.setItem('brewingHistory', JSON.stringify(brewingHistory));
-                updateHistoryDisplay();
+                const indexToDelete = brewingHistory.findIndex(brew => brew.id === id);
+                if (indexToDelete !== -1) {
+                    brewingHistory.splice(indexToDelete, 1);
+                    
+                    // 更新剩餘項目的沖泡次數
+                    brewingHistory.forEach((brew, index) => {
+                        brew.number = index + 1;
+                    });
+                    
+                    localStorage.setItem('brewingHistory', JSON.stringify(brewingHistory));
+                    updateHistoryDisplay();
+                }
             }
             
             // 清除所有歷史紀錄
