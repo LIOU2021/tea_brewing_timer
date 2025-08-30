@@ -105,18 +105,32 @@
         
         .history-item .brew-info {
             display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            flex-grow: 1;
+        }
+        
+        .history-item .brew-main {
+            display: flex;
             align-items: center;
+            margin-bottom: 3px;
         }
         
         .history-item span.number {
             font-weight: bold;
             margin-right: 8px;
-            min-width: 24px;
+            min-width: 50px;
         }
         
         .history-item span.time {
             font-weight: bold;
             color: #6b8e23;
+        }
+        
+        .history-item .stop-time {
+            font-size: 0.85em;
+            color: #666;
+            margin-left: 58px;
         }
         
         .clear-history {
@@ -138,6 +152,20 @@
             
             button {
                 width: 100%;
+            }
+            
+            .history-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .history-item .brew-info {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .history-item .stop-time {
+                margin-left: 0;
             }
         }
     </style>
@@ -211,6 +239,8 @@
                     
                     // 紀錄這次泡茶時間
                     const currentTime = formatTime(elapsedTime);
+                    const now = new Date();
+                    const stopTime = `${padZero(now.getHours())}:${padZero(now.getMinutes())}:${padZero(now.getSeconds())}`;
                     
                     // 新增沖泡次數屬性，第一次泡的茶是第1次，以此類推
                     const brewNumber = brewingHistory.length + 1;
@@ -219,6 +249,7 @@
                         id: Date.now(),
                         time: currentTime,
                         timestamp: new Date().toLocaleString(),
+                        stopTime: stopTime,
                         number: brewNumber
                     });
                     
@@ -307,6 +338,9 @@
                     const brewInfo = document.createElement('div');
                     brewInfo.className = 'brew-info';
                     
+                    const brewMain = document.createElement('div');
+                    brewMain.className = 'brew-main';
+                    
                     const numberSpan = document.createElement('span');
                     numberSpan.className = 'number';
                     numberSpan.textContent = `第${brew.number}次: `;
@@ -314,6 +348,10 @@
                     const timeSpan = document.createElement('span');
                     timeSpan.className = 'time';
                     timeSpan.textContent = formatTimeForDisplay(brew.time);
+                    
+                    const stopTimeDiv = document.createElement('div');
+                    stopTimeDiv.className = 'stop-time';
+                    stopTimeDiv.textContent = `濾掉時間: ${brew.stopTime || '未記錄'}`;
                     
                     const deleteBtn = document.createElement('button');
                     deleteBtn.textContent = '刪除';
@@ -323,13 +361,16 @@
                     deleteBtn.style.borderRadius = '3px';
                     deleteBtn.style.padding = '3px 8px';
                     deleteBtn.style.cursor = 'pointer';
+                    deleteBtn.style.fontSize = '0.85em';
                     
                     deleteBtn.addEventListener('click', () => {
                         deleteHistoryItem(brew.id);
                     });
                     
-                    brewInfo.appendChild(numberSpan);
-                    brewInfo.appendChild(timeSpan);
+                    brewMain.appendChild(numberSpan);
+                    brewMain.appendChild(timeSpan);
+                    brewInfo.appendChild(brewMain);
+                    brewInfo.appendChild(stopTimeDiv);
                     item.appendChild(brewInfo);
                     item.appendChild(deleteBtn);
                     historyList.appendChild(item);
