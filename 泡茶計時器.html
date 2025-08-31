@@ -35,6 +35,27 @@
             color: #333;
         }
         
+        .clock-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .clock-display {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c5530;
+            margin-bottom: 5px;
+        }
+        
+        .clock-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
         .buttons {
             display: flex;
             justify-content: center;
@@ -173,6 +194,11 @@
 <body>
     <h1>茶葉沖泡計時器</h1>
     
+    <div class="clock-container">
+        <div class="clock-display" id="currentClock">00:00:00</div>
+        <div class="clock-label">當前時間</div>
+    </div>
+    
     <div class="timer-container">
         <div class="display" id="timer">00:00:00</div>
         <div class="buttons">
@@ -192,6 +218,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             // 選取DOM元素
             const timerDisplay = document.getElementById('timer');
+            const currentClock = document.getElementById('currentClock');
             const startBtn = document.getElementById('startBtn');
             const stopBtn = document.getElementById('stopBtn');
             const resetBtn = document.getElementById('resetBtn');
@@ -202,6 +229,7 @@
             let startTime;
             let elapsedTime = 0;
             let timerInterval;
+            let clockInterval;
             let isRunning = false;
             const originalTitle = document.title;
             
@@ -209,11 +237,29 @@
             let brewingHistory = JSON.parse(localStorage.getItem('brewingHistory')) || [];
             updateHistoryDisplay();
             
+            // 啟動時鐘顯示
+            startClock();
+            
             // 按鈕事件監聽
             startBtn.addEventListener('click', startTimer);
             stopBtn.addEventListener('click', stopTimer);
             resetBtn.addEventListener('click', resetTimer);
             clearBtn.addEventListener('click', clearHistory);
+            
+            // 啟動時鐘
+            function startClock() {
+                updateClock();
+                clockInterval = setInterval(updateClock, 1000);
+            }
+            
+            // 更新時鐘顯示
+            function updateClock() {
+                const now = new Date();
+                const hours = padZero(now.getHours());
+                const minutes = padZero(now.getMinutes());
+                const seconds = padZero(now.getSeconds());
+                currentClock.textContent = `${hours}:${minutes}:${seconds}`;
+            }
             
             // 開始計時
             function startTimer() {
