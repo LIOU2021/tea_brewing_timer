@@ -246,6 +246,18 @@
             resetBtn.addEventListener('click', resetTimer);
             clearBtn.addEventListener('click', clearHistory);
             
+            // 空白鍵事件監聽
+            document.addEventListener('keydown', function(event) {
+                if (event.code === 'Space') {
+                    event.preventDefault();
+                    if (isRunning) {
+                        stopTimer();
+                    } else {
+                        startTimer();
+                    }
+                }
+            });
+            
             // 啟動時鐘
             function startClock() {
                 updateClock();
